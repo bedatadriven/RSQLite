@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.renjin</groupId>
             <artifactId>renjin-jdbc</artifactId>
-            <version>1.0.9014-b2</version>
+            <version>1.0-b8</version>
         </dependency>
 
         <!--
