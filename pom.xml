@@ -1,0 +1,144 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.renjin</groupId>
+    <artifactId>RSQLite</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <!-- general information about your package -->
+    <name>RSQLite</name>
+    <description>RSQLite connection.</description>
+    <url>http://www.renjin.org</url>
+    <licenses>
+        <!-- add one or more licenses under which the package is released -->
+        <license>
+            <name>GPL 2.0</name>
+            <url>http://www.gpl.org</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <renjin.version>0.8.2240</renjin.version>
+      <maven.compiler.source>1.7</maven.compiler.source>
+      <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!-- the script engine is convenient even if you do not use it explicitly -->
+        <dependency>
+            <groupId>org.renjin</groupId>
+            <artifactId>renjin-script-engine</artifactId>
+            <version>${renjin.version}</version>
+        </dependency>
+        <!-- the hamcrest package is only required if you use it for unit tests -->
+        <dependency>
+            <groupId>org.renjin</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>${renjin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.renjin</groupId>
+            <artifactId>utils</artifactId>
+            <version>${renjin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.renjin.cran</groupId>
+            <artifactId>memoise</artifactId>
+            <version>1.0.0-b32</version>
+        </dependency>
+        <dependency>
+            <groupId>org.renjin.cran</groupId>
+            <artifactId>Rcpp</artifactId>
+            <version>0.12.5-renjin-7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.renjin</groupId>
+            <artifactId>methods</artifactId>
+            <version>${renjin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.renjin</groupId>
+            <artifactId>stats</artifactId>
+            <version>${renjin.version}</version>
+        </dependency>
+        <!-- the DBI package -->
+          <dependency>
+              <groupId>org.renjin.cran</groupId>
+              <artifactId>DBI</artifactId>
+              <version>1.1-SNAPSHOT</version>
+          </dependency>
+        <dependency>
+            <groupId>org.renjin.cran</groupId>
+            <artifactId>renjin-jdbc</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+
+        <!--
+        <dependency>
+            <groupId>org.renjin.cran</groupId>
+            <artifactId>Rcpp</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+        -->
+
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>bedatadriven</id>
+            <name>bedatadriven public repo</name>
+            <url>https://nexus.bedatadriven.com/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>bedatadriven</id>
+            <name>bedatadriven public repo</name>
+            <url>https://nexus.bedatadriven.com/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <build>
+    
+    <sourceDirectory>src/renjin</sourceDirectory>
+    
+    
+        <plugins>
+            <plugin>
+                <groupId>org.renjin</groupId>
+                <artifactId>renjin-maven-plugin</artifactId>
+                <version>${renjin.version}</version>
+                <executions>
+
+                  <execution>
+                    <id>build</id>
+                    <goals>
+                      <goal>namespace-compile</goal>
+                    </goals>
+                    <phase>process-classes</phase>
+                    <configuration>
+                      <sourceDirectory>R</sourceDirectory>
+                      <!--<sourceFiles>
+                        <sourceFile></sourceFile>
+                      </sourceFiles> -->
+                    </configuration>
+                  </execution>
+
+                    <execution>
+                        <id>test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>test</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
