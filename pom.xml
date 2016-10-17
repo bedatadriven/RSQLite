@@ -73,7 +73,7 @@
             <version>0.5-1-b2</version>
         </dependency>
         <dependency>
-            <groupId>org.renjin.cran</groupId>
+            <groupId>org.renjin</groupId>
             <artifactId>renjin-jdbc</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
