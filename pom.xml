@@ -21,6 +21,19 @@
         </license>
     </licenses>
 
+  <distributionManagement>
+    <repository>
+      <id>renjin-packages</id>
+      <name>Renjin CI Repository</name>
+      <url>http://nexus.bedatadriven.com/content/repositories/renjin-packages</url>
+    </repository>
+    <snapshotRepository>
+      <id>renjin-latest</id>
+      <name>Renjin Latest Builds</name>
+      <url>http://nexus.bedatadriven.com/content/repositories/renjin-latest/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <renjin.version>0.8.2240</renjin.version>
