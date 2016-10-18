@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.renjin.cran</groupId>
             <artifactId>DBI</artifactId>
-            <version>0.5-1-b2</version>
+            <version>0.5-12-bdd-b2</version>
         </dependency>
         <dependency>
             <groupId>org.renjin</groupId>
