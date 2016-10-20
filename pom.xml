@@ -83,6 +83,11 @@
             <artifactId>renjin-jdbc</artifactId>
             <version>1.0-b8</version>
         </dependency>
+        <dependency>
+        <groupId>org.xerial</groupId>
+        <artifactId>sqlite-jdbc</artifactId>
+        <version>3.8.7</version>
+        </dependency>
 
         <!--
         <dependency>
