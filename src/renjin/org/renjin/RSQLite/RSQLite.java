@@ -16,7 +16,7 @@ import java.sql.Statement;
 public class RSQLite {
 
 
-    public static SEXP RSQLite_rsqlite_connect(String path, boolean allowExt, int flags, String vfs) {
+    public static SEXP RSQLite_rsqlite_connect(String path, boolean allowExt, int flags, String vfs) throws SQLException {
         String prefix = "jdbc:sqlite:";
         String fullPath;
         fullPath = path.startsWith(prefix) ? path : prefix.concat(path);
@@ -25,8 +25,12 @@ public class RSQLite {
         // config.setReadOnly(true);
         // config.setSharedCache(true);
         // config.recursiveTriggers(true);
-
-        Connection connection = DriverManager.getConnection(fullPath);
+        Connection connection;
+        try {
+            connection = DriverManager.getConnection(fullPath);
+        } catch (Throwable t) {
+            throw new EvalException(t);
+        }
         return (SEXP) connection;
     }
 
