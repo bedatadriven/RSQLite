@@ -33,16 +33,19 @@ public class RSQLite {
         Properties pragmaTable = new Properties();
         pragmaTable.setProperty("open_mode", String.valueOf(flags));
         pragmaTable.setProperty("enable_load_extension", String.valueOf(allowExt));
-        pragmaTable.setProperty("temp_store_directory", String.format("\'%s\'", new Object[]{vfs}));
+//        pragmaTable.setProperty("temp_store_directory", String.format("\'%s\'", new Object[]{vfs}));
         pragmaTable.setProperty("date_string_format", "yyyy-MM-dd HH:mm:ss.SSS");
-        pragmaTable.setProperty("busy_timeout", "3000");
         pragmaTable.setProperty("transaction_mode", "DEFFERED");
         pragmaTable.setProperty("date_class","INTEGER");
         pragmaTable.setProperty("date_precision", "MILLISECONDS");
-        pragmaTable.setProperty("busy_timeout", "3000");
-
-        Class.forName("org.sqlite.JDBC");
-        Connection connection = DriverManager.getConnection(fullPath, pragmaTable);
+//        pragmaTable.setProperty("busy_timeout", "3000");
+        Connection connection = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection(fullPath, pragmaTable);
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
         return connection;
     }
 
@@ -54,8 +57,8 @@ public class RSQLite {
         new ExtendedCommand.BackupCommand(from, to);
     }
 
-    public static boolean RSQLite_rsqlite_connection_valid(String connection) {
-        return JDBC.isValidURL(connection);
+    public static boolean RSQLite_rsqlite_connection_valid(String con) {
+        return JDBC.isValidURL(con);
     }
 
     public static boolean RSQLite_rsqlite_import_file(SEXP con, String name, SEXP value, SEXP sep, SEXP eol, boolean skip) {
@@ -64,8 +67,7 @@ public class RSQLite {
 
     public static ResultSet RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException {
         Statement statement = connection.createStatement();
-        ResultSet result = statement.executeQuery(sql);
-        return result;
+        return statement.executeQuery(sql);
     }
 
     public static void RSQLite_rsqlite_clear_result(ResultSet result) throws SQLException {
@@ -79,8 +81,7 @@ public class RSQLite {
     public static ResultSet RSQLite_rsqlite_fetch(ResultSet result, int n) throws SQLException {
         Statement statement = result.getStatement();
         statement.setFetchSize(n);
-        ResultSet updatedResult = statement.getResultSet();
-        return updatedResult;
+        return statement.getResultSet();
     }
 
     public static IntVector RSQLite_rsqlite_find_params(ResultSet result, SEXP param_names) {

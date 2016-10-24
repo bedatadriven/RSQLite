@@ -27,18 +27,18 @@
         </license>
     </licenses>
 
-  <distributionManagement>
-    <repository>
-      <id>renjin-packages</id>
-      <name>Renjin CI Repository</name>
-      <url>http://nexus.bedatadriven.com/content/repositories/renjin-packages</url>
-    </repository>
-    <snapshotRepository>
-      <id>renjin-latest</id>
-      <name>Renjin Latest Builds</name>
-      <url>http://nexus.bedatadriven.com/content/repositories/renjin-latest/</url>
-    </snapshotRepository>
-  </distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>renjin-packages</id>
+            <name>Renjin CI Repository</name>
+            <url>http://nexus.bedatadriven.com/content/repositories/renjin-packages</url>
+        </repository>
+        <snapshotRepository>
+            <id>renjin-latest</id>
+            <name>Renjin Latest Builds</name>
+            <url>http://nexus.bedatadriven.com/content/repositories/renjin-latest/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <!-- the hamcrest package is only required if you use it for unit tests -->
@@ -89,9 +89,9 @@
             <version>1.0-b8</version>
         </dependency>
         <dependency>
-        <groupId>org.xerial</groupId>
-        <artifactId>sqlite-jdbc</artifactId>
-        <version>3.8.7</version>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.8.7</version>
         </dependency>
 
         <!--
@@ -121,32 +121,29 @@
     </pluginRepositories>
 
     <build>
-    
-    <sourceDirectory>src/renjin</sourceDirectory>
-    
-    
+        <resources>
+            <resource>
+                <directory>inst</directory>
+                <targetPath>org/renjin/cran/RSQLite</targetPath>
+            </resource>
+        </resources>
+        <sourceDirectory>src/renjin</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.renjin</groupId>
                 <artifactId>renjin-maven-plugin</artifactId>
                 <version>${renjin.version}</version>
                 <executions>
-
-                  <execution>
-                    <id>build</id>
-                    <goals>
-                      <goal>namespace-compile</goal>
-                    </goals>
-                    <phase>process-classes</phase>
-                    <configuration>
-                      <sourceDirectory>R</sourceDirectory>
-                      <dataDirectory>inst/db</dataDirectory>
-                      <!--<sourceFiles>
-                        <sourceFile></sourceFile>
-                      </sourceFiles> -->
-                    </configuration>
-                  </execution>
-
+                    <execution>
+                        <id>build</id>
+                        <goals>
+                            <goal>namespace-compile</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <sourceDirectory>R</sourceDirectory>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>test</id>
                         <goals>
