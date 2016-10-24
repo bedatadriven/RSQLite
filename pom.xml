@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <renjin.version>0.8.2240</renjin.version>
+        <renjin.version>0.9.0-SNAPSHOT</renjin.version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
@@ -45,6 +45,11 @@
         <dependency>
             <groupId>org.renjin</groupId>
             <artifactId>hamcrest</artifactId>
+            <version>${renjin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.renjin</groupId>
+            <artifactId>datasets</artifactId>
             <version>${renjin.version}</version>
         </dependency>
         <dependency>
@@ -135,6 +140,7 @@
                     <phase>process-classes</phase>
                     <configuration>
                       <sourceDirectory>R</sourceDirectory>
+                      <dataDirectory>inst/db</dataDirectory>
                       <!--<sourceFiles>
                         <sourceFile></sourceFile>
                       </sourceFiles> -->
