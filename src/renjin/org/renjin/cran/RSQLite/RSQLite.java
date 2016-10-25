@@ -1,7 +1,9 @@
 package org.renjin.cran.RSQLite;
 
 import org.renjin.eval.EvalException;
+import org.renjin.sexp.AtomicVector;
 import org.renjin.sexp.IntVector;
+import org.renjin.sexp.ListVector;
 import org.renjin.sexp.SEXP;
 
 import java.io.File;
@@ -14,6 +16,10 @@ import java.sql.Statement;
 import java.util.Properties;
 
 import org.sqlite.*;
+
+import static org.renjin.JDBC.JDBCUtils.columnInfo;
+import static org.renjin.JDBC.JDBCUtils.fetch;
+import static org.renjin.JDBC.JDBCUtils.hasCompleted;
 
 /**
  *
@@ -31,8 +37,8 @@ public class RSQLite {
         System.out.println(vfs);
 
         Properties pragmaTable = new Properties();
-        pragmaTable.setProperty("open_mode", String.valueOf(flags));
         pragmaTable.setProperty("enable_load_extension", String.valueOf(allowExt));
+//        pragmaTable.setProperty("open_mode", String.valueOf(flags));
 //        pragmaTable.setProperty("temp_store_directory", String.format("\'%s\'", new Object[]{vfs}));
         pragmaTable.setProperty("date_string_format", "yyyy-MM-dd HH:mm:ss.SSS");
         pragmaTable.setProperty("transaction_mode", "DEFFERED");
@@ -54,20 +60,39 @@ public class RSQLite {
     }
 
     public static void RSQLite_rsqlite_copy_database(String from, String to) {
-        new ExtendedCommand.BackupCommand(from, to);
+//        new ExtendedCommand.BackupCommand(from, to);
+        throw new EvalException("TODO: RSQLite_rsqlite_copy_database");
     }
 
-    public static boolean RSQLite_rsqlite_connection_valid(String con) {
-        return JDBC.isValidURL(con);
+    public static boolean RSQLite_rsqlite_connection_valid(String conn) {
+        return JDBC.isValidURL(conn);
     }
 
     public static boolean RSQLite_rsqlite_import_file(SEXP con, String name, SEXP value, SEXP sep, SEXP eol, boolean skip) {
-        throw new EvalException("TODO: rsqlite_import_file");
+        throw new EvalException("TODO: RSQLite_rsqlite_import_file");
     }
 
-    public static ResultSet RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException {
-        Statement statement = connection.createStatement();
-        return statement.executeQuery(sql);
+    public static ResultSet RSQLite_rsqlite_send_query(String conn, String sql) throws SQLException, ClassNotFoundException {
+        ResultSet result;
+        try {
+            Connection connection = RSQLite_rsqlite_connect(conn, true, 70, "");
+            Statement statement = connection.createStatement();
+            result = statement.executeQuery(sql);
+            return result;
+        } catch (SQLException e) {
+        }
+        return null;
+    }
+
+    public static ResultSet RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
+        ResultSet result;
+        try {
+            Statement statement = connection.createStatement();
+            result = statement.executeQuery(sql);
+            return result;
+        } catch (SQLException e) {
+        }
+        return null;
     }
 
     public static void RSQLite_rsqlite_clear_result(ResultSet result) throws SQLException {
@@ -76,41 +101,41 @@ public class RSQLite {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+//        throw new EvalException("TODO: RSQLite_rsqlite_clear_result");
     }
 
-    public static ResultSet RSQLite_rsqlite_fetch(ResultSet result, int n) throws SQLException {
-        Statement statement = result.getStatement();
-        statement.setFetchSize(n);
-        return statement.getResultSet();
+    public static ListVector RSQLite_rsqlite_fetch(ResultSet result, AtomicVector n) throws SQLException {
+        return fetch(result, n.getElementAsInt(0));
     }
 
     public static IntVector RSQLite_rsqlite_find_params(ResultSet result, SEXP param_names) {
-        throw new EvalException("TODO: rsqlite_find_params");
+        throw new EvalException("TODO: RSQLite_rsqlite_find_params");
     }
 
     public static void RSQLite_rsqlite_bind_rows(SEXP res, SEXP params) {
-        throw new EvalException("TODO: rsqlite_bind_rows");
+        throw new EvalException("TODO: RSQLite_rsqlite_bind_rows");
     }
 
-    public static boolean RSQLite_rsqlite_has_completed(SEXP res) {
-        throw new EvalException("TODO: rsqlite_has_completed");
+    public static boolean RSQLite_rsqlite_has_completed(ResultSet res) {
+        return hasCompleted(res);
     }
 
     public static int RSQLite_rsqlite_row_count(ResultSet result) throws SQLException {
-        Statement statement = result.getStatement();
-        return statement.getMaxRows();
+//        Statement statement = result.getStatement();
+//        return statement.getMaxRows();
+        throw new EvalException("TODO: RSQLite_rsqlite_row_count");
     }
 
     public static int RSQLite_rsqlite_rows_affected(SEXP res) {
-        throw new EvalException("TODO: ____");
+        throw new EvalException("TODO: RSQLite_rsqlite_rows_affected");
     }
 
-    public static SEXP RSQLite_rsqlite_column_info(SEXP res) {
-        throw new EvalException("TODO: rsqlite_column_info");
+    public static ListVector RSQLite_rsqlite_column_info(ResultSet res) {
+        return columnInfo(res);
     }
 
     public static boolean RSQLite_rsqlite_result_valid(ResultSet result) {
-        throw new EvalException("TODO: rsqlite_result_valid");
+        throw new EvalException("TODO: RSQLite_rsqlite_result_valid");
     }
 
     public static String RSQLite_rsqliteVersion() {
@@ -118,6 +143,6 @@ public class RSQLite {
     }
 
     public static void RSQLite_init_logging( SEXP log_level) {
-        throw new EvalException("TODO: init_logging");
+        throw new EvalException("TODO: RSQLite_init_logging");
     }
 }
