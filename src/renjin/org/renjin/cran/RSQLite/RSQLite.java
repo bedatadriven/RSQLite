@@ -74,9 +74,9 @@ public class RSQLite {
 
     public static ResultSet RSQLite_rsqlite_send_query(String conn, String sql) throws SQLException, ClassNotFoundException {
         ResultSet result;
+        Connection connection = RSQLite_rsqlite_connect(conn, true, 70, "");
+        Statement statement = connection.createStatement();
         try {
-            Connection connection = RSQLite_rsqlite_connect(conn, true, 70, "");
-            Statement statement = connection.createStatement();
             result = statement.executeQuery(sql);
             return result;
         } catch (SQLException e) {
@@ -86,8 +86,8 @@ public class RSQLite {
 
     public static ResultSet RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
         ResultSet result;
+        Statement statement = connection.createStatement();
         try {
-            Statement statement = connection.createStatement();
             result = statement.executeQuery(sql);
             return result;
         } catch (SQLException e) {
