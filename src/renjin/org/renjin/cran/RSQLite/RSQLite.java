@@ -173,7 +173,7 @@ public class RSQLite {
     }
 
     public static boolean RSQLite_rsqlite_result_valid(ResultSet result) {
-        throw new EvalException("TODO: RSQLite_rsqlite_result_valid");
+        return result != null;
     }
 
     public static String RSQLite_rsqliteVersion() {
