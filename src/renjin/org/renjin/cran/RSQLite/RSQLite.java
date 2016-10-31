@@ -129,7 +129,6 @@ public class RSQLite {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-//        throw new EvalException("TODO: RSQLite_rsqlite_clear_result");
     }
 
     public static ListVector RSQLite_rsqlite_fetch(ResultSet result, AtomicVector n) throws SQLException {
@@ -149,9 +148,8 @@ public class RSQLite {
     }
 
     public static int RSQLite_rsqlite_row_count(ResultSet result) throws SQLException {
-//        Statement statement = result.getStatement();
-//        return statement.getMaxRows();
-        throw new EvalException("TODO: RSQLite_rsqlite_row_count");
+        Statement statement = result.getStatement();
+        return statement.getMaxRows();
     }
 
     public static int RSQLite_rsqlite_rows_affected(ResultSet resultSet) throws SQLException {
