@@ -94,7 +94,7 @@ public class RSQLite {
             String sqlInsertTable = "INSERT INTO " + table + " SELECT * FROM fromDB." + table;
             to.prepareStatement(sqlInsertTable).execute();
         }
-        String sqlDetachDb = "DETACH DATABASE \"" + cleanPath +"\"";
+        String sqlDetachDb = "DETACH DATABASE fromDB";
         to.prepareStatement(sqlDetachDb).execute();
     }
 
