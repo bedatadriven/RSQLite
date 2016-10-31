@@ -88,6 +88,8 @@ public class RSQLite {
             String sqlInsertTable = "INSERT INTO " + table + " SELECT * FROM fromDB." + table;
             to.prepareStatement(sqlInsertTable).execute();
         }
+        String sqlDetachDb = "DETACH DATABASE \"" + cleanPath +"\"";
+        to.prepareStatement(sqlDetachDb).execute();
     }
 
     public static boolean RSQLite_rsqlite_connection_valid(String conn) {
