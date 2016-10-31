@@ -56,9 +56,43 @@ public class RSQLite {
         connection.close();
     }
 
-    public static void RSQLite_rsqlite_copy_database(String from, String to) {
-//        new ExtendedCommand.BackupCommand(from, to);
-        throw new EvalException("TODO: RSQLite_rsqlite_copy_database");
+    private static ArrayList<String> listTables (Connection from) {
+        ArrayList<String> dbTables = new ArrayList<>();
+        ResultSet resultSet = null;
+        try {
+            DatabaseMetaData dbMetaData = from.getMetaData();
+            String types[] = { "TABLE" };
+            resultSet = dbMetaData.getTables(null, null, "", types);
+            while (resultSet.next()) {
+                dbTables.add(resultSet.getString("TABLE_NAME"));
+            }
+        } catch (SQLException e) {
+            throw new EvalException(e);
+        }
+        finally {
+            if( resultSet!=null ) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    throw new EvalException(e);
+                }
+            }
+        }
+        return dbTables;
+    }
+
+    public static void RSQLite_rsqlite_copy_database(Connection from, Connection to) throws SQLException {
+        ArrayList<String> dbTables = listTables(from);
+        String fromPath = from.getMetaData().getURL();
+        String prefix = "jdbc:sqlite:";
+        String cleanPath = fromPath.startsWith(prefix) ? fromPath.substring(12) : fromPath;
+        // attach new database so you can copy columns over
+        String sqlAttachDb = "ATTACH DATABASE \"" + cleanPath + "\" AS fromDB";
+        to.prepareStatement(sqlAttachDb).execute();
+        for (String table : dbTables) {
+            String sqlInsertTable = "INSERT INTO " + table + " SELECT * FROM fromDB." + table;
+            to.prepareStatement(sqlInsertTable).execute();
+        }
     }
 
     public static boolean RSQLite_rsqlite_connection_valid(String conn) {
