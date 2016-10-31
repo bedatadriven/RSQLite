@@ -26,7 +26,13 @@ public class RSQLite {
         String prefix = "jdbc:sqlite:";
         String filePref = "file://";
         String cleanPath = path.startsWith(filePref) ? path.substring(7) : path;
-        final String fullPath = path.startsWith(prefix) ? path : prefix.concat(cleanPath);
+        File dbFile = new File(cleanPath);
+        String fullPath;
+        if (dbFile.isDirectory()) {
+            fullPath = prefix.concat("memory:");
+        } else {
+            fullPath = path.startsWith(prefix) ? path : prefix.concat(cleanPath);
+        }
 
         Properties pragmaTable = new Properties();
         pragmaTable.setProperty("enable_load_extension", String.valueOf(allowExt));
