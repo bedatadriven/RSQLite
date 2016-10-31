@@ -143,8 +143,15 @@ public class RSQLite {
         return fetch(result, n.getElementAsInt(0));
     }
 
-    public static IntVector RSQLite_rsqlite_find_params(ResultSet result, SEXP param_names) {
-        throw new EvalException("TODO: RSQLite_rsqlite_find_params");
+    public static IntVector RSQLite_rsqlite_find_params(ResultSet result, Vector param_names) throws SQLException {
+        int paramLength = param_names.length();
+        IntArrayVector.Builder params = new IntArrayVector.Builder();
+        for (int j = 0; j < paramLength; j++) {
+            int position = result.findColumn(param_names.getElementAsString(j));
+            int fixedPosition = position == 0 ? IntVector.NA : position;
+            params.add(fixedPosition);
+        }
+        return params.build();
     }
 
     public static void RSQLite_rsqlite_bind_rows(SEXP res, SEXP params) {
