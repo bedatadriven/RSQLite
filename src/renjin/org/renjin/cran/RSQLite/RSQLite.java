@@ -1,18 +1,13 @@
 package org.renjin.cran.RSQLite;
 
 import org.renjin.eval.EvalException;
-import org.renjin.sexp.AtomicVector;
-import org.renjin.sexp.IntVector;
-import org.renjin.sexp.ListVector;
-import org.renjin.sexp.SEXP;
+import org.renjin.sexp.*;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Properties;
 
 import org.sqlite.*;
