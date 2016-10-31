@@ -115,15 +115,17 @@ public class RSQLite {
         return null;
     }
 
-    public static ResultSet RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
+    public static SEXP RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
         ResultSet result;
         Statement statement = connection.createStatement();
-        try {
-            result = statement.executeQuery(sql);
-            return result;
-        } catch (SQLException e) {
+        if (statement.execute(sql)) {
+            // This means that excute returns a ResultSet object
+            result = statement.getResultSet();
+            return new ExternalPtr(result);
+        } else {
+            EmptyResultSet emptyResultSet = new EmptyResultSet();
+            return new ExternalPtr(emptyResultSet);
         }
-        return null;
     }
 
     public static void RSQLite_rsqlite_clear_result(ResultSet result) throws SQLException {
@@ -157,8 +159,13 @@ public class RSQLite {
         throw new EvalException("TODO: RSQLite_rsqlite_row_count");
     }
 
-    public static int RSQLite_rsqlite_rows_affected(SEXP res) {
-        throw new EvalException("TODO: RSQLite_rsqlite_rows_affected");
+    public static int RSQLite_rsqlite_rows_affected(ResultSet resultSet) throws SQLException {
+        Statement statement = resultSet.getStatement();
+        if (statement == null) {
+            return 0;
+        } else {
+            return statement.getUpdateCount();
+        }
     }
 
     public static ListVector RSQLite_rsqlite_column_info(ResultSet res) {
