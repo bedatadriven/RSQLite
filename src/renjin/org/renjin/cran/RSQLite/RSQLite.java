@@ -27,30 +27,27 @@ import static org.renjin.JDBC.JDBCUtils.hasCompleted;
 public class RSQLite {
 
 
-    public static Connection RSQLite_rsqlite_connect(String path, boolean allowExt, int flags, String vfs) throws SQLException, ClassNotFoundException {
+    public static Connection RSQLite_rsqlite_connect(final String path, final boolean allowExt, final int flags, final String vfs) throws SQLException, ClassNotFoundException {
         String prefix = "jdbc:sqlite:";
         String filePref = "file://";
         String cleanPath = path.startsWith(filePref) ? path.substring(7) : path;
-        String fullPath = path.startsWith(prefix) ? path : prefix.concat(cleanPath);
-
-        System.out.println(fullPath);
-        System.out.println(vfs);
+        final String fullPath = path.startsWith(prefix) ? path : prefix.concat(cleanPath);
 
         Properties pragmaTable = new Properties();
         pragmaTable.setProperty("enable_load_extension", String.valueOf(allowExt));
-//        pragmaTable.setProperty("open_mode", String.valueOf(flags));
-//        pragmaTable.setProperty("temp_store_directory", String.format("\'%s\'", new Object[]{vfs}));
+        pragmaTable.setProperty("open_mode", String.valueOf(flags));
+        pragmaTable.setProperty("temp_store_directory", String.format("\'%s\'", new Object[]{vfs}));
         pragmaTable.setProperty("date_string_format", "yyyy-MM-dd HH:mm:ss.SSS");
         pragmaTable.setProperty("transaction_mode", "DEFFERED");
         pragmaTable.setProperty("date_class","INTEGER");
         pragmaTable.setProperty("date_precision", "MILLISECONDS");
-//        pragmaTable.setProperty("busy_timeout", "3000");
+        pragmaTable.setProperty("busy_timeout", "3000");
         Connection connection = null;
         try {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection(fullPath, pragmaTable);
         } catch (Exception e) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            throw new EvalException(e);
         }
         return connection;
     }
