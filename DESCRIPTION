@@ -15,15 +15,15 @@ Description: This package embeds the SQLite database engine in R and
     provides an interface compliant with the DBI package. The
     source for the SQLite engine (version 3.8.8.2) is included.
 Depends:
-    R (>= 3.1.0)
+    R (>= 3.1.0),
+    methods,
+    DBI (>= 0.4-9)
 Suggests:
     testthat,
     knitr,
     rmarkdown,
     DBItest
 Imports:
-    methods,
-    DBI (>= 0.4-9),
     Rcpp (>= 0.12.7),
     memoise
 LinkingTo: Rcpp, BH, plogr
