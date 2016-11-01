@@ -1,15 +1,16 @@
 package org.renjin.cran.RSQLite;
 
+import org.renjin.JDBC.columns.*;
 import org.renjin.eval.EvalException;
 import org.renjin.sexp.*;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Properties;
+import java.sql.Date;
+import java.util.*;
 
+import org.renjin.sexp.Vector;
 import org.sqlite.*;
 
 import static org.renjin.JDBC.JDBCUtils.columnInfo;
@@ -106,41 +107,29 @@ public class RSQLite {
         throw new EvalException("TODO: RSQLite_rsqlite_import_file");
     }
 
-    public static ResultSet RSQLite_rsqlite_send_query(String conn, String sql) throws SQLException, ClassNotFoundException {
-        ResultSet result;
-        Connection connection = RSQLite_rsqlite_connect(conn, true, 70, "");
-        Statement statement = connection.createStatement();
-        try {
-            result = statement.executeQuery(sql);
-            return result;
-        } catch (SQLException e) {
-        }
-        return null;
+    public static SEXP RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        ExternalPtr result = new ExternalPtr(preparedStatement);
+        return result;
     }
 
-    public static SEXP RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
-        ResultSet result;
-        Statement statement = connection.createStatement();
-        if (statement.execute(sql)) {
-            // This means that excute returns a ResultSet object
-            result = statement.getResultSet();
-            return new ExternalPtr(result);
+    public static void RSQLite_rsqlite_clear_result(PreparedStatement preparedStatement) throws SQLException {
+//        if (preparedStatement.execute()) {
+//            preparedStatement.executeQuery().close();
+//        }
+    }
+
+    public static ListVector RSQLite_rsqlite_fetch(Object preparedStatement, AtomicVector n) throws SQLException, EvalException {
+        PreparedStatement preparedStatement1 = (PreparedStatement) preparedStatement;
+//        throw new EvalException("CALL TO fetch()");
+        if (preparedStatement1.execute()) {
+            ResultSet resultSet = preparedStatement1.executeQuery();
+            return fetch(resultSet, n.getElementAsInt(0));
         } else {
             EmptyResultSet emptyResultSet = new EmptyResultSet();
-            return new ExternalPtr(emptyResultSet);
+            return fetch(emptyResultSet, n.getElementAsInt(0));
         }
-    }
 
-    public static void RSQLite_rsqlite_clear_result(ResultSet result) throws SQLException {
-        try {
-            result.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static ListVector RSQLite_rsqlite_fetch(ResultSet result, AtomicVector n) throws SQLException {
-        return fetch(result, n.getElementAsInt(0));
     }
 
     public static IntVector RSQLite_rsqlite_find_params(ResultSet resultSet, Vector param_names) throws SQLException {
@@ -173,30 +162,51 @@ public class RSQLite {
         }
     }
 
-    public static boolean RSQLite_rsqlite_has_completed(ResultSet res) {
-        return hasCompleted(res);
-    }
-
-    public static int RSQLite_rsqlite_row_count(ResultSet result) throws SQLException {
-        Statement statement = result.getStatement();
-        return statement.getMaxRows();
-    }
-
-    public static int RSQLite_rsqlite_rows_affected(ResultSet resultSet) throws SQLException {
-        Statement statement = resultSet.getStatement();
-        if (statement == null) {
-            return 0;
+    public static boolean RSQLite_rsqlite_has_completed(PreparedStatement preparedStatement) throws SQLException {
+        if (preparedStatement.execute()) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return hasCompleted(resultSet);
         } else {
-            return statement.getUpdateCount();
+            return true;
         }
     }
 
-    public static ListVector RSQLite_rsqlite_column_info(ResultSet res) {
-        return columnInfo(res);
+    public static int RSQLite_rsqlite_row_count(PreparedStatement preparedStatement) throws SQLException {
+        if (preparedStatement.execute()) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.getFetchSize();
+        } else {
+            return 0;
+        }
     }
 
-    public static boolean RSQLite_rsqlite_result_valid(ResultSet result) {
-        return result != null;
+    public static int RSQLite_rsqlite_rows_affected(PreparedStatement preparedStatement) throws SQLException {
+        Statement statement;
+        if (preparedStatement.execute()) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            statement = resultSet.getStatement();
+            return statement.getUpdateCount();
+        } else {
+            return 0;
+        }
+    }
+
+    public static ListVector RSQLite_rsqlite_column_info(PreparedStatement preparedStatement) throws SQLException {
+        if (preparedStatement.execute()) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return columnInfo(resultSet);
+        } else {
+            return ListVector.EMPTY;
+        }
+    }
+
+    public static boolean RSQLite_rsqlite_result_valid(PreparedStatement preparedStatement) throws SQLException {
+        if (preparedStatement.execute()) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet != null;
+        } else {
+            return true;
+        }
     }
 
     public static String RSQLite_rsqliteVersion() {
