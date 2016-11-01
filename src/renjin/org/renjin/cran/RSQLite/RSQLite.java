@@ -143,19 +143,34 @@ public class RSQLite {
         return fetch(result, n.getElementAsInt(0));
     }
 
-    public static IntVector RSQLite_rsqlite_find_params(ResultSet result, Vector param_names) throws SQLException {
+    public static IntVector RSQLite_rsqlite_find_params(ResultSet resultSet, Vector param_names) throws SQLException {
         int paramLength = param_names.length();
         IntArrayVector.Builder params = new IntArrayVector.Builder();
         for (int j = 0; j < paramLength; j++) {
-            int position = result.findColumn(param_names.getElementAsString(j));
+            int position = resultSet.findColumn(param_names.getElementAsString(j));
             int fixedPosition = position == 0 ? IntVector.NA : position;
             params.add(fixedPosition);
         }
         return params.build();
     }
 
-    public static void RSQLite_rsqlite_bind_rows(SEXP res, SEXP params) {
-        throw new EvalException("TODO: RSQLite_rsqlite_bind_rows");
+  public static void RSQLite_rsqlite_bind_rows(PreparedStatement preparedStatement, ListVector params) throws SQLException {
+        if (params.length() >= 0) {
+            for (int i = 0; i < params.length(); ++i) {
+                if(params.getElementAsObject(i) instanceof String) {
+                    preparedStatement.setString(i, params.getElementAsString(i));
+                } else if(params.getElementAsObject(i) instanceof Integer) {
+                    preparedStatement.setInt(i, params.getElementAsInt(i));
+                } else if(params.getElementAsObject(i) instanceof Double) {
+                    preparedStatement.setDouble(i, params.getElementAsDouble(i));
+                } else if(params.getElementAsObject(i) instanceof Logical) {
+                    preparedStatement.setObject(i, params.getElementAsLogical(i));
+                } else {
+                    preparedStatement.setObject(i, params.getElementAsObject(i));
+                }
+                preparedStatement.addBatch();
+            }
+        }
     }
 
     public static boolean RSQLite_rsqlite_has_completed(ResultSet res) {
