@@ -147,17 +147,16 @@ public class RSQLite {
         if (params.length() >= 0) {
             for (int i = 0; i < params.length(); ++i) {
                 if(params.getElementAsObject(i) instanceof String) {
-                    preparedStatement.setString(i, params.getElementAsString(i));
+                    preparedStatement.setString(i+1, params.getElementAsString(i));
                 } else if(params.getElementAsObject(i) instanceof Integer) {
-                    preparedStatement.setInt(i, params.getElementAsInt(i));
+                    preparedStatement.setInt(i+1, params.getElementAsInt(i));
                 } else if(params.getElementAsObject(i) instanceof Double) {
-                    preparedStatement.setDouble(i, params.getElementAsDouble(i));
+                    preparedStatement.setDouble(i+1, params.getElementAsDouble(i));
                 } else if(params.getElementAsObject(i) instanceof Logical) {
-                    preparedStatement.setObject(i, params.getElementAsLogical(i));
+                    preparedStatement.setObject(i+1, params.getElementAsLogical(i));
                 } else {
-                    preparedStatement.setObject(i, params.getElementAsObject(i));
+                    preparedStatement.setObject(i+1, params.getElementAsObject(i));
                 }
-                preparedStatement.addBatch();
             }
         }
     }
