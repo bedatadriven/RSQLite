@@ -108,26 +108,31 @@ public class RSQLite {
     }
 
     public static SEXP RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
+        connection.setAutoCommit(false);
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         ExternalPtr result = new ExternalPtr(preparedStatement);
         return result;
     }
 
     public static void RSQLite_rsqlite_clear_result(PreparedStatement preparedStatement) throws SQLException {
-//        if (preparedStatement.execute()) {
-//            preparedStatement.executeQuery().close();
-//        }
+        if (preparedStatement.execute()) {
+            preparedStatement.executeQuery().close();
+        }
     }
 
-    public static ListVector RSQLite_rsqlite_fetch(Object preparedStatement, AtomicVector n) throws SQLException, EvalException {
-        PreparedStatement preparedStatement1 = (PreparedStatement) preparedStatement;
-//        throw new EvalException("CALL TO fetch()");
-        if (preparedStatement1.execute()) {
-            ResultSet resultSet = preparedStatement1.executeQuery();
-            return fetch(resultSet, n.getElementAsInt(0));
+    public static ListVector RSQLite_rsqlite_fetch(PreparedStatement preparedStatement, IntVector n) throws SQLException, EvalException {
+        Connection connection = preparedStatement.getConnection();
+        connection.commit();
+        if (preparedStatement.execute()) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            int index = n.getElementAsInt(0);
+            ListVector result = fetch(resultSet, index);
+            return result;
         } else {
             EmptyResultSet emptyResultSet = new EmptyResultSet();
-            return fetch(emptyResultSet, n.getElementAsInt(0));
+            int index = n.getElementAsInt(0);
+            ListVector result = fetch(emptyResultSet, index);
+            return result;
         }
 
     }
@@ -184,7 +189,8 @@ public class RSQLite {
         if (preparedStatement.execute()) {
             ResultSet resultSet = preparedStatement.executeQuery();
             statement = resultSet.getStatement();
-            return statement.getUpdateCount();
+            int result = statement.getUpdateCount();
+            return result;
         } else {
             return 0;
         }
