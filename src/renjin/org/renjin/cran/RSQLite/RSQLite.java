@@ -108,28 +108,24 @@ public class RSQLite {
     }
 
     public static SEXP RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
-        connection.setAutoCommit(false);
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        ExternalPtr result = new ExternalPtr(preparedStatement);
-        return result;
-    }
-
-    public static void RSQLite_rsqlite_clear_result(PreparedStatement preparedStatement) throws SQLException {
-        if (preparedStatement.execute()) {
-            preparedStatement.executeQuery().close();
-        }
-    }
-
-    public static ListVector RSQLite_rsqlite_fetch(PreparedStatement preparedStatement, IntVector n) throws SQLException, EvalException {
-        Connection connection = preparedStatement.getConnection();
-        connection.commit();
-        if (preparedStatement.execute()) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            int index = n.getElementAsInt(0);
-            ListVector result = fetch(resultSet, index);
+        if (sql.contains("?") || sql.contains(":")) {
+            // Use preparedStatement
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ExternalPtr result = new ExternalPtr(preparedStatement);
             return result;
         } else {
-            EmptyResultSet emptyResultSet = new EmptyResultSet();
+            // use Statement
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = null;
+            if (statement.execute(sql)) {
+                resultSet = statement.executeQuery(sql);
+            } else {
+                resultSet = new EmptyResultSet();
+            }
+            ExternalPtr result = new ExternalPtr(resultSet);
+            return result;
+        }
+    }
             int index = n.getElementAsInt(0);
             ListVector result = fetch(emptyResultSet, index);
             return result;
