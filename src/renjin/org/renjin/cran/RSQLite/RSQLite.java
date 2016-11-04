@@ -235,12 +235,23 @@ public class RSQLite {
         }
     }
 
-    public static int RSQLite_rsqlite_rows_affected(PreparedStatement preparedStatement) throws SQLException {
-        Statement statement;
-        if (preparedStatement.execute()) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            statement = resultSet.getStatement();
-            int result = statement.getUpdateCount();
+    public static int RSQLite_rsqlite_rows_affected(Object obj) throws SQLException {
+        if (obj instanceof PreparedStatement) {
+            PreparedStatement preparedStatement = (PreparedStatement) obj;
+            Statement statement;
+            if (preparedStatement.execute()) {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                statement = resultSet.getStatement();
+                int result = statement.getUpdateCount();
+                return result;
+            } else {
+                return 0;
+            }
+        } else if (obj instanceof EmptyResultSet) {
+            return 0;
+        } else if (obj instanceof ResultSet) {
+            ResultSet resultSet = (ResultSet) obj;
+            int result = resultSet.getStatement().getUpdateCount();
             return result;
         } else {
             return 0;
