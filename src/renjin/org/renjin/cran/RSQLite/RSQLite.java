@@ -174,7 +174,8 @@ public class RSQLite {
         }
     }
 
-    public static IntVector RSQLite_rsqlite_find_params(ResultSet resultSet, Vector param_names) throws SQLException {
+    public static IntVector RSQLite_rsqlite_find_params(PreparedStatement preparedStatement, ListVector param_names) throws SQLException {
+        ResultSet resultSet = preparedStatement.executeQuery();
         int paramLength = param_names.length();
         IntArrayVector.Builder params = new IntArrayVector.Builder();
         for (int j = 0; j < paramLength; j++) {
