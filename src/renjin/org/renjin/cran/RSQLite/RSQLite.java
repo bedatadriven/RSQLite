@@ -230,8 +230,9 @@ public class RSQLite {
     public static int RSQLite_rsqlite_row_count(PreparedStatement preparedStatement) throws SQLException {
         if (preparedStatement.execute()) {
             ResultSet resultSet = preparedStatement.executeQuery();
-            return resultSet.getFetchSize();
+            int result = resultSet.getFetchSize();
             resultSet.close();
+            return result;
         } else {
             return 0;
         }
