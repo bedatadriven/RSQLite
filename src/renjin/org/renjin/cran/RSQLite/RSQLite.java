@@ -185,22 +185,34 @@ public class RSQLite {
         return params.build();
     }
 
-  public static void RSQLite_rsqlite_bind_rows(PreparedStatement preparedStatement, ListVector params) throws SQLException {
-        if (params.length() >= 0) {
-            for (int i = 0; i < params.length(); ++i) {
-                if(params.getElementAsObject(i) instanceof String) {
-                    preparedStatement.setString(i+1, params.getElementAsString(i));
-                } else if(params.getElementAsObject(i) instanceof Integer) {
-                    preparedStatement.setInt(i+1, params.getElementAsInt(i));
-                } else if(params.getElementAsObject(i) instanceof Double) {
-                    preparedStatement.setDouble(i+1, params.getElementAsDouble(i));
-                } else if(params.getElementAsObject(i) instanceof Logical) {
-                    preparedStatement.setObject(i+1, params.getElementAsLogical(i));
-                } else {
-                    preparedStatement.setObject(i+1, params.getElementAsObject(i));
-                }
-            }
-        }
+  public static void RSQLite_rsqlite_bind_rows(Object object, ListVector allParams) throws SQLException {
+      if (object instanceof PreparedStatement) {PreparedStatement preparedStatement = (PreparedStatement) object;
+          IntVector foundParams = RSQLite_rsqlite_find_params(preparedStatement, allParams);
+          ListVector.Builder matchedParams = new ListVector.Builder();
+          for (int index : foundParams) {
+              matchedParams.add(allParams.get(index));
+          }
+          ListVector params = matchedParams.build();
+          if (params.length() >= 0) {
+              for (int i = 0; i < params.length(); ++i) {
+                  if(params.getElementAsObject(i) instanceof String) {
+                      preparedStatement.setString(i+1, params.getElementAsString(i));
+                  } else if(params.getElementAsObject(i) instanceof Integer) {
+                      preparedStatement.setInt(i+1, params.getElementAsInt(i));
+                  } else if(params.getElementAsObject(i) instanceof Double) {
+                      preparedStatement.setDouble(i+1, params.getElementAsDouble(i));
+                  } else if(params.getElementAsObject(i) instanceof Logical) {
+                      preparedStatement.setObject(i+1, params.getElementAsLogical(i));
+                  } else {
+                      preparedStatement.setObject(i+1, params.getElementAsObject(i));
+                  }
+              }
+              preparedStatement.addBatch();
+              preparedStatement.getConnection().commit();
+          }
+
+      }
+
     }
 
     public static boolean RSQLite_rsqlite_has_completed(PreparedStatement preparedStatement) throws SQLException {
