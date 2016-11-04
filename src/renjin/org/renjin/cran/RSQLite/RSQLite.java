@@ -140,11 +140,38 @@ public class RSQLite {
         }
     }
 
+    public static ListVector RSQLite_rsqlite_fetch(Object object, IntVector n) throws SQLException, EvalException {
+        if (object instanceof PreparedStatement) {
+            PreparedStatement preparedStatement = (PreparedStatement) object;
+            Connection connection = preparedStatement.getConnection();
+            if (preparedStatement.execute()) {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                int index = n.getElementAsInt(0);
+                ListVector result = fetch(resultSet, index);
+                resultSet.close();
+                return result;
+            } else {
+                EmptyResultSet emptyResultSet = new EmptyResultSet();
+                int index = n.getElementAsInt(0);
+                ListVector result = fetch(emptyResultSet, index);
+                emptyResultSet.close();
+                return result;
+            }
+        } else if (object instanceof EmptyResultSet) {
+            EmptyResultSet emptyResultSet = (EmptyResultSet) object;
             int index = n.getElementAsInt(0);
             ListVector result = fetch(emptyResultSet, index);
+            emptyResultSet.close();
             return result;
+        } else if (object instanceof ResultSet) {
+            ResultSet resultSet = (ResultSet) object;
+            int index = n.getElementAsInt(0);
+            ListVector result = fetch(resultSet, index);
+            resultSet.close();
+            return result;
+        } else {
+            return ListVector.EMPTY;
         }
-
     }
 
     public static IntVector RSQLite_rsqlite_find_params(ResultSet resultSet, Vector param_names) throws SQLException {
