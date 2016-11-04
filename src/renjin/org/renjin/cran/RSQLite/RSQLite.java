@@ -126,6 +126,20 @@ public class RSQLite {
             return result;
         }
     }
+
+    public static void RSQLite_rsqlite_clear_result(Object obj) throws SQLException {
+        if (obj instanceof EmptyResultSet) {
+            ((EmptyResultSet)obj).close();
+        } else if (obj instanceof ResultSet) {
+            ((ResultSet)obj).close();
+        } else if (obj instanceof PreparedStatement) {
+            PreparedStatement preparedStatement = (PreparedStatement) obj;
+            if (preparedStatement.execute()) {
+                preparedStatement.executeQuery().close();
+            }
+        }
+    }
+
             int index = n.getElementAsInt(0);
             ListVector result = fetch(emptyResultSet, index);
             return result;
