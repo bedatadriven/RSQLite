@@ -216,10 +216,11 @@ public class RSQLite {
 
     }
 
-    public static boolean RSQLite_rsqlite_has_completed(PreparedStatement preparedStatement) throws SQLException {
-        if (preparedStatement.execute()) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            return hasCompleted(resultSet);
+    public static boolean RSQLite_rsqlite_has_completed(Object obj) throws SQLException {
+        if (obj instanceof EmptyResultSet) {
+            return hasCompleted((EmptyResultSet) obj );
+        } else if (obj instanceof ResultSet) {
+            return hasCompleted((ResultSet) obj);
         } else {
             return true;
         }
