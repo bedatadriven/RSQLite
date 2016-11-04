@@ -183,6 +183,7 @@ public class RSQLite {
             int fixedPosition = position == 0 ? IntVector.NA : position;
             params.add(fixedPosition);
         }
+        resultSet.close();
         return params.build();
     }
 
@@ -230,6 +231,7 @@ public class RSQLite {
         if (preparedStatement.execute()) {
             ResultSet resultSet = preparedStatement.executeQuery();
             return resultSet.getFetchSize();
+            resultSet.close();
         } else {
             return 0;
         }
@@ -243,6 +245,8 @@ public class RSQLite {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 statement = resultSet.getStatement();
                 int result = statement.getUpdateCount();
+                statement.close();
+                resultSet.close();
                 return result;
             } else {
                 return 0;
@@ -252,6 +256,7 @@ public class RSQLite {
         } else if (obj instanceof ResultSet) {
             ResultSet resultSet = (ResultSet) obj;
             int result = resultSet.getStatement().getUpdateCount();
+            resultSet.close();
             return result;
         } else {
             return 0;
@@ -283,6 +288,7 @@ public class RSQLite {
                     throw new EvalException(e);
                 }
                 boolean result = resultSet != null;
+                resultSet.close();
                 return result;
             } else {
                 return true;
