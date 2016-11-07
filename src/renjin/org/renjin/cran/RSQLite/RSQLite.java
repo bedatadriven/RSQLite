@@ -1,21 +1,16 @@
 package org.renjin.cran.RSQLite;
 
-import org.renjin.JDBC.columns.*;
 import org.renjin.eval.EvalException;
 import org.renjin.sexp.*;
+import org.sqlite.JDBC;
+import org.sqlite.SQLiteJDBCLoader;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.sql.*;
-import java.sql.Date;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Properties;
 
-import org.renjin.sexp.Vector;
-import org.sqlite.*;
-
-import static org.renjin.JDBC.JDBCUtils.columnInfo;
-import static org.renjin.JDBC.JDBCUtils.fetch;
-import static org.renjin.JDBC.JDBCUtils.hasCompleted;
+import static org.renjin.JDBC.JDBCUtils.*;
 
 /**
  *
@@ -108,7 +103,7 @@ public class RSQLite {
     }
 
     public static SEXP RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
-        if (sql.contains("?") || sql.contains(":")) {
+        if (sql.contains("?") || sql.contains(":") || sql.contains("$")) {
             // Use preparedStatement
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ExternalPtr result = new ExternalPtr(preparedStatement);
@@ -132,42 +127,33 @@ public class RSQLite {
             ((EmptyResultSet)obj).close();
         } else if (obj instanceof ResultSet) {
             ((ResultSet)obj).close();
-        } else if (obj instanceof PreparedStatement) {
-            PreparedStatement preparedStatement = (PreparedStatement) obj;
-            if (preparedStatement.execute()) {
-                preparedStatement.executeQuery().close();
-            }
         }
     }
 
-    public static ListVector RSQLite_rsqlite_fetch(Object object, IntVector n) throws SQLException, EvalException {
+    public static ListVector RSQLite_rsqlite_fetch(Object object, Object n) throws SQLException, EvalException {
+        int index;
+        if (n instanceof Vector) {
+            index = ((Vector) n).getElementAsInt(0);
+        } else if (n instanceof Double) {
+          index = ((Double) n).intValue();
+        } else {
+            index = (Integer) n;
+        }
         if (object instanceof PreparedStatement) {
             PreparedStatement preparedStatement = (PreparedStatement) object;
             Connection connection = preparedStatement.getConnection();
             if (preparedStatement.execute()) {
                 ResultSet resultSet = preparedStatement.executeQuery();
-                int index = n.getElementAsInt(0);
                 ListVector result = fetch(resultSet, index);
-                resultSet.close();
                 return result;
             } else {
-                EmptyResultSet emptyResultSet = new EmptyResultSet();
-                int index = n.getElementAsInt(0);
-                ListVector result = fetch(emptyResultSet, index);
-                emptyResultSet.close();
-                return result;
+                return ListVector.EMPTY;
             }
         } else if (object instanceof EmptyResultSet) {
-            EmptyResultSet emptyResultSet = (EmptyResultSet) object;
-            int index = n.getElementAsInt(0);
-            ListVector result = fetch(emptyResultSet, index);
-            emptyResultSet.close();
-            return result;
+            return ListVector.EMPTY;
         } else if (object instanceof ResultSet) {
             ResultSet resultSet = (ResultSet) object;
-            int index = n.getElementAsInt(0);
             ListVector result = fetch(resultSet, index);
-            resultSet.close();
             return result;
         } else {
             return ListVector.EMPTY;
@@ -175,47 +161,48 @@ public class RSQLite {
     }
 
     public static IntVector RSQLite_rsqlite_find_params(PreparedStatement preparedStatement, ListVector param_names) throws SQLException {
-        ResultSet resultSet = preparedStatement.executeQuery();
-        int paramLength = param_names.length();
-        IntArrayVector.Builder params = new IntArrayVector.Builder();
-        for (int j = 0; j < paramLength; j++) {
-            int position = resultSet.findColumn(param_names.getElementAsString(j));
-            int fixedPosition = position == 0 ? IntVector.NA : position;
-            params.add(fixedPosition);
-        }
-        resultSet.close();
-        return params.build();
+        throw new EvalException("TODO: RSQLite_rsqlite_find_params");
     }
 
   public static void RSQLite_rsqlite_bind_rows(Object object, ListVector allParams) throws SQLException {
-      if (object instanceof PreparedStatement) {PreparedStatement preparedStatement = (PreparedStatement) object;
-          IntVector foundParams = RSQLite_rsqlite_find_params(preparedStatement, allParams);
-          ListVector.Builder matchedParams = new ListVector.Builder();
-          for (int index : foundParams) {
-              matchedParams.add(allParams.get(index));
+      if (object instanceof PreparedStatement) {
+
+          PreparedStatement preparedStatement = (PreparedStatement) object;
+          ParameterMetaData parameterMetaData = null;
+          parameterMetaData = preparedStatement.getParameterMetaData();
+          int statementParamCount = parameterMetaData.getParameterCount();
+          int inputParamCount = allParams == null ? 0 : allParams.length();
+          if (statementParamCount != inputParamCount) {
+              throw new SQLException("query param count and update param count dont match");
           }
-          ListVector params = matchedParams.build();
-          if (params.length() >= 0) {
-              for (int i = 0; i < params.length(); ++i) {
-                  if(params.getElementAsObject(i) instanceof String) {
-                      preparedStatement.setString(i+1, params.getElementAsString(i));
-                  } else if(params.getElementAsObject(i) instanceof Integer) {
-                      preparedStatement.setInt(i+1, params.getElementAsInt(i));
-                  } else if(params.getElementAsObject(i) instanceof Double) {
-                      preparedStatement.setDouble(i+1, params.getElementAsDouble(i));
-                  } else if(params.getElementAsObject(i) instanceof Logical) {
-                      preparedStatement.setObject(i+1, params.getElementAsLogical(i));
+          if (allParams == ListVector.EMPTY || allParams == null) {
+              return;
+          }
+
+          for (int i = 0; i < allParams.length();i++) {
+              Object param = allParams.getElementAsObject(i);
+              if (allParams.getElementAsObject(i) != null) {
+                  if (param instanceof String) {
+                      preparedStatement.setString(i + 1, allParams.getElementAsString(i));
+                  } else if (param instanceof Double) {
+                      preparedStatement.setDouble(i + 1, allParams.getElementAsDouble(i));
+                  } else if (param instanceof Integer) {
+                      preparedStatement.setInt(i + 1, allParams.getElementAsInt(i));
                   } else {
-                      preparedStatement.setObject(i+1, params.getElementAsObject(i));
+                      preparedStatement.setObject(i + 1, param);
                   }
+              } else {
+                  int sqlType = Types.VARCHAR;
+                  try {
+                      sqlType = parameterMetaData.getParameterType(i + 1);
+                  } catch (SQLException e) {
+                  }
+                  preparedStatement.setNull(i + 1, sqlType);
               }
-              preparedStatement.addBatch();
-              preparedStatement.getConnection().commit();
           }
 
       }
-
-    }
+  }
 
     public static boolean RSQLite_rsqlite_has_completed(Object obj) throws SQLException {
         if (obj instanceof EmptyResultSet) {
@@ -227,11 +214,17 @@ public class RSQLite {
         }
     }
 
-    public static int RSQLite_rsqlite_row_count(PreparedStatement preparedStatement) throws SQLException {
-        if (preparedStatement.execute()) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            int result = resultSet.getFetchSize();
-            resultSet.close();
+    public static int RSQLite_rsqlite_row_count(Object object) throws SQLException {
+        if (object instanceof PreparedStatement) {PreparedStatement preparedStatement = (PreparedStatement) object;
+            if (preparedStatement.execute()) {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                int result = resultSet.getFetchSize();
+                return result;
+            } else {
+                return 0;
+            }
+        } else if (object instanceof ResultSet) {
+            int result = ((ResultSet) object).getFetchSize();
             return result;
         } else {
             return 0;
@@ -246,8 +239,6 @@ public class RSQLite {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 statement = resultSet.getStatement();
                 int result = statement.getUpdateCount();
-                statement.close();
-                resultSet.close();
                 return result;
             } else {
                 return 0;
@@ -257,7 +248,6 @@ public class RSQLite {
         } else if (obj instanceof ResultSet) {
             ResultSet resultSet = (ResultSet) obj;
             int result = resultSet.getStatement().getUpdateCount();
-            resultSet.close();
             return result;
         } else {
             return 0;
@@ -289,7 +279,6 @@ public class RSQLite {
                     throw new EvalException(e);
                 }
                 boolean result = resultSet != null;
-                resultSet.close();
                 return result;
             } else {
                 return true;
