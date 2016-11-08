@@ -224,21 +224,15 @@ public class RSQLite {
     public static int RSQLite_rsqlite_rows_affected(Object obj) throws SQLException {
         if (obj instanceof PreparedStatement) {
             PreparedStatement preparedStatement = (PreparedStatement) obj;
-            Statement statement;
+            int result = 0;
             if (preparedStatement.execute()) {
-                ResultSet resultSet = preparedStatement.executeQuery();
-                statement = resultSet.getStatement();
-                int result = statement.getUpdateCount();
-                return result;
-            } else {
-                return 0;
+                result = preparedStatement.executeQuery().getStatement().getUpdateCount();
             }
+            return result;
         } else if (obj instanceof EmptyResultSet) {
             return 0;
         } else if (obj instanceof ResultSet) {
-            ResultSet resultSet = (ResultSet) obj;
-            int result = resultSet.getStatement().getUpdateCount();
-            return result;
+            return ((ResultSet) obj).getStatement().getUpdateCount();
         } else {
             return 0;
         }
