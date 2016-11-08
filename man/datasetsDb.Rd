@@ -12,6 +12,9 @@ in the datasets package.
 }
 \examples{
 library(DBI)
+library(datasets)
+library(utils)
+data(CO2)
 db <- datasetsDb()
 dbListTables(db)
 

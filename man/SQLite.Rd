@@ -83,6 +83,8 @@ connection early, but it will not actually close until all open result
 sets have been closed (and you'll get a warning message to this effect).
 }
 \examples{
+library(datasets)
+library(utils)
 library(DBI)
 # Initialize a temporary in memory database and copy a data.frame into it
 con <- dbConnect(RSQLite::SQLite(), ":memory:")

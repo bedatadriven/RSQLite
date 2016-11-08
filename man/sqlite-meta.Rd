@@ -29,6 +29,8 @@
 See documentation of generics for more details.
 }
 \examples{
+library(datasets)
+library(utils)
 data(USArrests)
 con <- dbConnect(SQLite(), dbname=":memory:")
 dbWriteTable(con, "t1", USArrests)

@@ -22,12 +22,15 @@ This method is a straight-forward implementation of the corresponding
 generic function.
 }
 \examples{
+library(datasets)
+library(utils)
+data('quakes')
 dbDataType(SQLite(), 1)
 dbDataType(SQLite(), 1L)
 dbDataType(SQLite(), "1")
 dbDataType(SQLite(), TRUE)
 dbDataType(SQLite(), list())
 
-sapply(datasets::quakes, dbDataType, dbObj = SQLite())
+sapply(quakes, dbDataType, dbObj = SQLite())
 }
 

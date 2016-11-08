@@ -18,6 +18,8 @@
 List fields in specified table.
 }
 \examples{
+library(datasets)
+library(utils)
 con <- dbConnect(SQLite())
 dbWriteTable(con, "iris", iris)
 dbListFields(con, "iris")

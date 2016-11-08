@@ -23,6 +23,8 @@ connection.  It can be used to save an in-memory database (created using
 a copy of anothe database.
 }
 \examples{
+library(datasets)
+library(utils)
 # Copy the built in databaseDb() to an in memory dataset
 db <- dbConnect(RSQLite::SQLite(), ":memory:")
 sqliteCopyDatabase(datasetsDb(), db)
@@ -35,3 +37,9 @@ Seth Falcon
 \url{http://www.sqlite.org/backup.html}
 }
 
+library(RSQLite)
+library(datasets)
+library(utils)
+db <- dbConnect(RSQLite::SQLite(), ":memory:")
+sqliteCopyDatabase(datasetsDb(), db)
+dbListTables(db)

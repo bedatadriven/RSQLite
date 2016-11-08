@@ -84,6 +84,9 @@ Similarly, if the key column is not present in the \code{data.frame}, all
 elements are automatically assigned a value.
 }
 \examples{
+library(RSQLite)
+library(datasets)
+library(utils)
 con <- dbConnect(SQLite())
 dbWriteTable(con, "mtcars", mtcars)
 dbReadTable(con, "mtcars")
