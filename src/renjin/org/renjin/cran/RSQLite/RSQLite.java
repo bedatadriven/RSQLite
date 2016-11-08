@@ -122,17 +122,16 @@ public class RSQLite {
     }
 
     public static ListVector RSQLite_rsqlite_fetch(Object object, Object n) throws SQLException, EvalException {
-        int index;
-        if (n instanceof Vector) {
-            index = ((Vector) n).getElementAsInt(0);
-        } else if (n instanceof Double) {
-          index = ((Double) n).intValue();
+        long index;
+        if (n instanceof Double) {
+          index = ((Double) n).longValue();
+        } else if (n instanceof Integer) {
+            index = ((Integer) n).longValue();
         } else {
-            index = (Integer) n;
+            index = (Long) n;
         }
         if (object instanceof PreparedStatement) {
             PreparedStatement preparedStatement = (PreparedStatement) object;
-            Connection connection = preparedStatement.getConnection();
             if (preparedStatement.execute()) {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 ListVector result = fetch(resultSet, index);
