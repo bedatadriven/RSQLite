@@ -108,23 +108,9 @@ public class RSQLite {
     }
 
     public static SEXP RSQLite_rsqlite_send_query(Connection connection, String sql) throws SQLException, ClassNotFoundException {
-        if (sql.contains("?") || sql.contains(":") || sql.contains("$")) {
-            // Use preparedStatement
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             ExternalPtr result = new ExternalPtr(preparedStatement);
             return result;
-        } else {
-            // use Statement
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = null;
-            if (statement.execute(sql)) {
-                resultSet = statement.executeQuery(sql);
-            } else {
-                resultSet = new EmptyResultSet();
-            }
-            ExternalPtr result = new ExternalPtr(resultSet);
-            return result;
-        }
     }
 
     public static void RSQLite_rsqlite_clear_result(Object obj) throws SQLException {
