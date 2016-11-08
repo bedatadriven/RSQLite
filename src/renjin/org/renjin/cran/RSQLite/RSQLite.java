@@ -254,27 +254,10 @@ public class RSQLite {
     }
 
     public static boolean RSQLite_rsqlite_result_valid(Object obj) throws SQLException {
-        if (obj instanceof EmptyResultSet) {
+        if (obj != null) {
             return true;
-        } else if (obj instanceof ResultSet) {
-            boolean result = (ResultSet) obj != null;
-            return result;
-        } else if (obj instanceof PreparedStatement) {
-            PreparedStatement preparedStatement = (PreparedStatement) obj;
-            ResultSet resultSet = null;
-            if (preparedStatement.execute()) {
-                try {
-                    resultSet = preparedStatement.executeQuery();
-                } catch (SQLException e) {
-                    throw new EvalException(e);
-                }
-                boolean result = resultSet != null;
-                return result;
-            } else {
-                return true;
-            }
         } else {
-            return true;
+            return false;
         }
     }
 
