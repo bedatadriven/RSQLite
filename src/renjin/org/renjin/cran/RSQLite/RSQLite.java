@@ -1,6 +1,7 @@
 package org.renjin.cran.RSQLite;
 
 import org.renjin.eval.EvalException;
+import org.renjin.primitives.Warning;
 import org.renjin.sexp.*;
 import org.sqlite.JDBC;
 import org.sqlite.SQLiteJDBCLoader;
@@ -163,7 +164,7 @@ public class RSQLite {
           int statementParamCount = parameterMetaData.getParameterCount();
           int inputParamCount = allParams == null ? 0 : allParams.length();
           if (statementParamCount != inputParamCount) {
-              throw new SQLException("query param count and update param count dont match");
+              throw new SQLException("Query requires " + statementParamCount + "params; " + inputParamCount + " supplied.");
           }
           if (allParams == ListVector.EMPTY || allParams == null) {
               return;
@@ -172,15 +173,7 @@ public class RSQLite {
           for (int i = 0; i < allParams.length();i++) {
               Object param = allParams.getElementAsObject(i);
               if (allParams.getElementAsObject(i) != null) {
-                  if (param instanceof String) {
-                      preparedStatement.setString(i + 1, allParams.getElementAsString(i));
-                  } else if (param instanceof Double) {
-                      preparedStatement.setDouble(i + 1, allParams.getElementAsDouble(i));
-                  } else if (param instanceof Integer) {
-                      preparedStatement.setInt(i + 1, allParams.getElementAsInt(i));
-                  } else {
-                      preparedStatement.setObject(i + 1, param);
-                  }
+                  preparedStatement.setObject(i + 1, param);
               } else {
                   int sqlType = Types.VARCHAR;
                   try {
@@ -190,32 +183,40 @@ public class RSQLite {
                   preparedStatement.setNull(i + 1, sqlType);
               }
           }
-
       }
   }
 
     public static boolean RSQLite_rsqlite_has_completed(Object obj) throws SQLException {
         if (obj instanceof EmptyResultSet) {
-            return hasCompleted((EmptyResultSet) obj );
+            return true;
         } else if (obj instanceof ResultSet) {
             return hasCompleted((ResultSet) obj);
+        } else if (obj instanceof PreparedStatement) {
+            return false;
         } else {
             return true;
         }
     }
 
     public static int RSQLite_rsqlite_row_count(Object object) throws SQLException {
-        if (object instanceof PreparedStatement) {PreparedStatement preparedStatement = (PreparedStatement) object;
+        int count = 0;
+        if (object instanceof PreparedStatement) {
+            PreparedStatement preparedStatement = (PreparedStatement) object;
             if (preparedStatement.execute()) {
                 ResultSet resultSet = preparedStatement.executeQuery();
-                int result = resultSet.getFetchSize();
-                return result;
+                while (resultSet.next()) {
+                    count++;
+                }
+                return count;
             } else {
                 return 0;
             }
         } else if (object instanceof ResultSet) {
-            int result = ((ResultSet) object).getFetchSize();
-            return result;
+            ResultSet resultSet = (ResultSet) object;
+            while (resultSet.next()) {
+                count++;
+            }
+            return count;
         } else {
             return 0;
         }
