@@ -19,15 +19,20 @@ public class RSQLite {
 
 
     public static Connection RSQLite_rsqlite_connect(final String path, final boolean allowExt, final int flags, final String vfs) throws SQLException, ClassNotFoundException {
+
         String prefix = "jdbc:sqlite:";
+        String fullPath;
         String filePref = "file://";
         String cleanPath = path.startsWith(filePref) ? path.substring(7) : path;
         File dbFile = new File(cleanPath);
-        String fullPath;
-        if (dbFile.isDirectory()) {
-            fullPath = prefix.concat("memory:");
+        if (path.equals(":memory:") || path.equals("") || path.equals("jdbc:sqlite:memory") || path.equals("jdbc:sqlite::memory") || dbFile.isDirectory()) {
+            fullPath = prefix;
         } else {
-            fullPath = path.startsWith(prefix) ? path : prefix.concat(cleanPath);
+            if (dbFile.isDirectory()) {
+                throw new EvalException("Incorrect path to database.");
+            } else {
+                fullPath = path.startsWith(prefix) ? path : prefix.concat(cleanPath);
+            }
         }
 
         Properties pragmaTable = new Properties();
